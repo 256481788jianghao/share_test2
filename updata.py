@@ -3,6 +3,10 @@ import pandas as pd
 import os
 
 cons = ts.get_apis()
+baseDir = './database'
+
+if not os.path.exists(baseDir):
+    os.mkdir(baseDir)
 
 #df = ts.bar('300024',conn=cons)
 
@@ -25,16 +29,12 @@ for code in codes:
             index = index + 1
             print(code+" finish="+str(index)+'/'+str(codes_len))
             d['code'] = code
-            data_list.append(d)
+            d.to_csv(baseDir+"/"+code+".csv")
+            #data_list.append(d)
     except:
         print(code+" error")
 
-data = pd.concat(data_list)
-
-if os.path.exists('./database.csv'):
-    os.remove('./database.csv')
-
-data.to_csv('./database.csv')
+#data = pd.concat(data_list)
 
 
 
