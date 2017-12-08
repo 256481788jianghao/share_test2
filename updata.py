@@ -10,7 +10,8 @@ if not os.path.exists(baseDir):
 
 #df = ts.bar('300024',conn=cons)
 
-#all_base_info = ts.get_stock_basics()
+all_base_info = ts.get_stock_basics()
+all_base_info.to_csv(baseDir+"/"+"baseInfo.csv");
 
 #codes = all_base_info.index
 codes = ['300024','000002','601878']
