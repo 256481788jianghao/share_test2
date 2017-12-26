@@ -38,6 +38,7 @@ for code in codes:
     except:
         print(code+" error")
 """
+
 
 def getTickData(code,dates):
     index = 0
@@ -45,7 +46,8 @@ def getTickData(code,dates):
     for d in dates:
         try:
             index = index+1
-            df = ts.get_tick_data(code,date=d,pause = 0.1)
+            #df = ts.get_tick_data(code,date=d,pause = 0.1)
+            df = ts.tick(code,conn=cons,date=d)
             df.to_csv(baseDir+"/tick_"+code+"_"+d+".csv",encoding='utf-8')
             print(code+" "+d+"_"+str(index)+"/"+str(datalen))
         except:
@@ -53,7 +55,9 @@ def getTickData(code,dates):
         
 for code in codes:
     try:
-        getTickData(code,['2017-12-01','2017-12-04','2017-12-05','2017-12-06','2017-12-07','2017-12-08','2017-12-11'])
+        d_ra = pd.date_range('2017-11-25',periods=5)
+        print(d_ra)
+        getTickData(code,d_ra)
     except:
         print(code+" error");
 
