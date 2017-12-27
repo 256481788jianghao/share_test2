@@ -8,6 +8,18 @@ baseDir = './database'
 def readBaseInfo():
     return pd.read_csv(baseDir+"/baseInfo.csv",encoding='utf-8')
 
+def readData(codeStr,startDate=None,endDate=None):
+    if not os.path.exists(baseDir+'/'+codeStr+'.csv'):
+        print(baseDir+'/'+codeStr+'.csv not exists')
+        return pd.DataFrame()
+    
+    d = pd.read_csv(baseDir+'/'+codeStr+'.csv',encoding='utf-8')
+    if startDate != None:
+        d = d[d.datetime >= startDate]
+    if endDate != None:
+        d = d[d.datetime <= endDate]
+    return d
+
 baseInfo = readBaseInfo()
 
 def changeCodeToStr(code):
@@ -20,9 +32,18 @@ def changeCodeToStr(code):
     return codeStr
 
 baseInfo['codeStr'] = baseInfo.code.apply(changeCodeToStr)
+baseInfo = baseInfo[baseInfo.timeToMarket != 0]
 
-print(baseInfo.groupby('industry').get_group('元器件'))
+ans_list = []
+for code in baseInfo.codeStr:
+    d = readData(code,startDate='2017-12-21',endDate='2017-12-21')
+    if not d.empty:
+        ans_list.append(d)
+data_all = pd.concat(ans_list)
+data_all = data_all[(data_all.high-data_all.open)/data_all.open > 0.09]
+print(pd.concat([baseInfo.set_index('code'),data_all.set_index('code')],axis=1,join='inner').timeToMarket)
 
+    
 '''
 datetime
 code
