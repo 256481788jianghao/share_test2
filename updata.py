@@ -11,11 +11,11 @@ if not os.path.exists(baseDir):
 
 #df = ts.bar('300024',conn=cons)
 
-#all_base_info = ts.get_stock_basics()
-#all_base_info.to_csv(baseDir+"/"+"baseInfo.csv",encoding='utf-8');
+all_base_info = ts.get_stock_basics()
+all_base_info.to_csv(baseDir+"/"+"baseInfo.csv",encoding='utf-8');
 
-#codes = all_base_info.index
-codes = ['300024','000002','601878']
+codes = all_base_info.index
+#codes = ['300024','000002','601878']
 
 codes_len = len(codes)
 
@@ -28,19 +28,27 @@ for code in codes:
     try:
         if os.path.exists(baseDir+"/"+code+".csv"):
             index = index+1
-            print(baseDir+"/"+code+".csv exists")
             dold = pd.read_csv(baseDir+"/"+code+".csv");
-            oldtime = datetime.datetime.strptime(dold.datetime.iloc[0],'%Y-%m-%d')
+            dold['datetime'] = dold.datetime.apply(lambda x:pd.Timestamp(x))
+            #oldtime = datetime.datetime.strptime(dold.datetime.iloc[0],'%Y-%m-%d')
+            oldtime = dold.datetime.iloc[0]
             delta = todaytime - oldtime
+            update = False
+            if todaytime.weekday() < 5 and delta.days > 0:
+                update = True
+            elif todaytime.weekday() == 5 and delta.days > 1:
+                update = True
+            elif todaytime.weekday() == 6 and delta.days > 2:
+                update = True
 
-            if delta.days > 0:
-                startTime = oldtime+datetime.timedelta(days=1)
-                s = startTime.strftime('%Y-%m-%d')
-                ditems = ts.bar(code,conn=cons,freq='D',adj='qfq',start_date=s,factors=['tor'])
-                dold.set_index('datetime')
-                dnew = pd.merge(ditems,dold)
-                print(dnew)
-                break            
+            if update:
+                d = ts.bar(code,conn=cons,freq='D',adj='qfq',start_date='2014-1-1',factors=['tor'])
+                if type(d) != pd.DataFrame:
+                     print(code+" get failed!")
+                else:
+                    d['code'] = code
+                    d.to_csv(baseDir+"/"+code+".csv",encoding='utf-8')
+            print(code+" finish="+str(index)+'/'+str(codes_len))
         else:
             d = ts.bar(code,conn=cons,freq='D',adj='qfq',start_date='2014-1-1',factors=['tor'])
             if type(d) != pd.DataFrame:
