@@ -98,16 +98,20 @@ def pe_mean(item):
     ans_dict = {}
     pe_zero = item[item.pe <= 0.0]
     pe_h = item[item.pe > 0]
-    ans_dict['pe_zero_len'] = len(pe_zero)
-    ans_dict['pe_h_len'] = len(pe_h)
+    pb_zero = item[item.pb <= 0.0]
+    pb_h = item[item.pb > 0]
+    #ans_dict['pe_zero_len'] = len(pe_zero)
+    #ans_dict['pb_zero_len'] = len(pb_zero)
+    #ans_dict['pe_h_len'] = len(pe_h)
+    #ans_dict['pb_h_len'] = len(pb_h)
     ans_dict['pe_mean'] = pe_h.pe.mean()
-    ans_dict['pb_mean'] = item.pb.mean()
+    ans_dict['pb_mean'] = pb_h.pb.mean()
     return pd.Series(ans_dict)
 
-'''
+
 ans_data = baseInfo.groupby('industry').apply(pe_mean)
 print(ans_data.sort_values(by=['pb_mean']))
-'''
+
 #==================================================================================
 def my_test_1(item):
     ans_dict = {}
@@ -125,23 +129,41 @@ print(ans_data.sort_values('ch_max'))
 #===================================================================================
 def getB(code):
     data = readSomeData([code],startDate='2017-01-01')
+    ans_dict = {}
+    ans_dict['codeStr'] = code
     if not data.empty:
         data_s1 = data.shift(1)
         diff = (data_s1.high - data.open)/data.open
-        diff_b = diff[diff > 5/1000.0]
-        return len(diff_b)/len(diff)
-    else:
-        return 0
+        diff_s = (data_s1.low - data.open)/data.open
+        ans_dict['change_b'] = len(diff[diff > 5/1000.0])/len(diff)
+        ans_dict['change_s_min'] = diff_s.min()
+        ans_dict['change_s_mean'] = diff_s.mean()
+        return pd.Series(ans_dict)
 '''
-baseInfo['change_b'] = baseInfo.codeStr.apply(getB)
-print(baseInfo[baseInfo.change_b > 0.5j])
+ans = baseInfo.codeStr.apply(getB)
+ans = ans.set_index(keys='codeStr')
+baseInfo = baseInfo.set_index('codeStr')
+baseInfo = pd.concat([baseInfo,ans],axis = 1)
+print(baseInfo[baseInfo.change_b > 0.6])
 '''
+
 #==================================================================================
 def my_test_2(data):
     ans_dict = {}
+    my_acount_n = 0
+    my_acount_price = 0
+    data_len = len(data)
+    for index in range(data_len):
+        item = data.iloc[-index]
+        if my_acount_n == 0:
+            my_acount_price = item.open
+            my_acount_n = 1000
+        else:
+            pass
     return pd.Series(ans_dict)
-
+'''
 print(my_test_2(readSomeData(['000002'],startDate='2017-01-01')))
+'''
 #===================================================================================
 
 '''
