@@ -9,7 +9,7 @@ baseDir = './database'
 def readBaseInfo():
     return pd.read_csv(baseDir+"/baseInfo.csv",encoding='utf-8')
 
-def readData(codeStr,startDate=None,endDate=None):
+def readData(codeStr,startDate=None,endDate=None,first=None):
     if not os.path.exists(baseDir+'/'+codeStr+'.csv'):
         print(baseDir+'/'+codeStr+'.csv not exists')
         return pd.DataFrame()
@@ -19,14 +19,16 @@ def readData(codeStr,startDate=None,endDate=None):
         d = d[d.datetime >= startDate]
     if endDate != None:
         d = d[d.datetime <= endDate]
+    if first != None:
+        d = d.head(first)
     return d
 
-def readSomeData(codes,startDate=None,endDate=None):
+def readSomeData(codes,startDate=None,endDate=None,first=None):
     if len(codes) == 0:
         return pd.DataFrame()
     ans_list = []
     for code in codes:
-        d = readData(code,startDate=startDate,endDate=endDate)
+        d = readData(code,startDate=startDate,endDate=endDate,first=first)
         if not d.empty:
             ans_list.append(d)
     if len(ans_list) == 0:
@@ -59,6 +61,15 @@ def computeDays(date):
 baseInfo['days'] = baseInfo.timeToMarket.apply(computeDays)
 
 baseInfo = baseInfo[baseInfo.days > 10]
+#======================================================================================================
+def appyly_func(item):
+    ans_dict = {}
+    data = readSomeData(item.codeStr,first=1)
+    if not data.empty:
+        print(data)
+    return pd.Series(ans_dict)
+ans_data = baseInfo.groupby('industry').apply(appyly_func)
+print(ans_data)
 #======================================================================================================
 
 def computeData(data):
@@ -108,9 +119,10 @@ def pe_mean(item):
     ans_dict['pb_mean'] = pb_h.pb.mean()
     return pd.Series(ans_dict)
 
-
+'''
 ans_data = baseInfo.groupby('industry').apply(pe_mean)
 print(ans_data.sort_values(by=['pb_mean']))
+'''
 
 #==================================================================================
 def my_test_1(item):
