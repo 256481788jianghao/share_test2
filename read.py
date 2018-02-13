@@ -62,13 +62,36 @@ baseInfo['days'] = baseInfo.timeToMarket.apply(computeDays)
 
 baseInfo = baseInfo[baseInfo.days > 10]
 #======================================================================================================
-def appyly_func(item):
+'''
+计算行业指数
+算法：
+1.行业内按流通股本分配权重
+2.以虚拟本金100元，按权重买入个股
+3.买入价为前一日开盘价格，卖出价为当日收盘价格
+'''
+com_date = '2017-08-07'    #必须补零
+
+def apply_group_func(items):
     ans_dict = {}
-    data = readSomeData(item.codeStr,first=1)
-    if not data.empty:
-        print(data)
+    items['save'] = 1
+    items['k'] = 0
+    items['p1'] = 1
+    items['p2'] = 1
+    for code in items.codeStr:
+        data = readData(code,endDate=com_date,first=2)
+        if data.empty:
+            items.loc[items.codeStr == code,'save'] = 0
+        else:
+            items.loc[items.codeStr == code,'p1'] = data.iloc[1].open
+            items.loc[items.codeStr == code,'p2'] = data.iloc[0].close
+                
+    items_save = items[items.save == 1]
+    items_save.loc[:,'k'] = items_save.outstanding/items_save.outstanding.sum()
+    #print(items_save)
+    ans_dict['time'] = com_date
+    ans_dict['a_in'] = (items_save.k/items_save.p1*(items_save.p2-items_save.p1)).sum()*100
     return pd.Series(ans_dict)
-ans_data = baseInfo.groupby('industry').apply(appyly_func)
+ans_data = baseInfo.groupby('industry').apply(apply_group_func)
 print(ans_data)
 #======================================================================================================
 
