@@ -34,7 +34,9 @@ for code in codes:
             oldtime = dold.datetime.iloc[0]
             delta = todaytime - oldtime
             update = False
-            if todaytime.weekday() < 5 and delta.days > 0:
+            if todaytime.weekday() < 5 and delta.days == 1 and todaytime.hour >= 23:
+                update = True
+            elif todaytime.weekday() < 5 and delta.days > 1:
                 update = True
             elif todaytime.weekday() == 5 and delta.days > 1:
                 update = True
@@ -61,7 +63,6 @@ for code in codes:
             #data_list.append(d)
     except:
         print(code+" error")
-
 
 """
 def getTickData(code,dates):
