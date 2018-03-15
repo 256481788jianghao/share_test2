@@ -61,7 +61,8 @@ def computeDays(date):
 baseInfo['days'] = baseInfo.timeToMarket.apply(computeDays)
 
 baseInfo = baseInfo[baseInfo.days > 10]
-#======================================================================================================
+
+#======================================================================================================
 '''
 计算行业指数
 算法：
@@ -69,7 +70,7 @@ baseInfo = baseInfo[baseInfo.days > 10]
 2.以虚拟本金100元，按权重买入个股
 3.买入价为前一日开盘价格，卖出价为当日收盘价格
 '''
-com_date = '2017-08-07'    #必须补零
+com_date = '2018-03-07'    #必须补零
 
 def apply_group_func(items):
     ans_dict = {}
@@ -79,7 +80,7 @@ def apply_group_func(items):
     items['p2'] = 1
     for code in items.codeStr:
         data = readData(code,endDate=com_date,first=2)
-        if data.empty:
+        if len(data) < 2:
             items.loc[items.codeStr == code,'save'] = 0
         else:
             items.loc[items.codeStr == code,'p1'] = data.iloc[1].open
@@ -92,7 +93,7 @@ def apply_group_func(items):
     ans_dict['a_in'] = (items_save.k/items_save.p1*(items_save.p2-items_save.p1)).sum()*100
     return pd.Series(ans_dict)
 ans_data = baseInfo.groupby('industry').apply(apply_group_func)
-print(ans_data)
+print(ans_data.sort_values(by='a_in',ascending=False))
 #======================================================================================================
 
 def computeData(data):
