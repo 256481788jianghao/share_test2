@@ -29,24 +29,30 @@ for code in codes:
         if os.path.exists(baseDir+"/"+code+".csv"):
             index = index+1
             dold = pd.read_csv(baseDir+"/"+code+".csv");
-            dold['datetime'] = dold.datetime.apply(lambda x:pd.Timestamp(x))
-            #oldtime = datetime.datetime.strptime(dold.datetime.iloc[0],'%Y-%m-%d')
-            oldtime = dold.datetime.iloc[0]
-            delta = todaytime - oldtime
-            update = False
-            if todaytime.weekday() < 5 and delta.days == 1 and todaytime.hour >= 23:
+            if dold.empty:
+                print(code+" exisit but empty")
                 update = True
-            elif todaytime.weekday() < 5 and delta.days > 1:
-                update = True
-            elif todaytime.weekday() == 5 and delta.days > 1:
-                update = True
-            elif todaytime.weekday() == 6 and delta.days > 2:
-                update = True
+            else:
+                dold['datetime'] = dold.datetime.apply(lambda x:pd.Timestamp(x))
+                #oldtime = datetime.datetime.strptime(dold.datetime.iloc[0],'%Y-%m-%d')
+                oldtime = dold.datetime.iloc[0]
+                delta = todaytime - oldtime
+                update = False
+                if todaytime.weekday() < 5 and delta.days == 1 and todaytime.hour >= 23:
+                    update = True
+                elif todaytime.weekday() < 5 and delta.days > 1:
+                    update = True
+                elif todaytime.weekday() == 5 and delta.days > 1:
+                    update = True
+                elif todaytime.weekday() == 6 and delta.days > 2:
+                    update = True
 
             if update:
-                d = ts.bar(code,conn=cons,freq='D',adj='qfq',start_date='2014-1-1',factors=['tor'])
+                d = ts.bar(code,conn=cons,freq='D',adj='qfq',start_date='2016-1-1',factors=['tor'])
                 if type(d) != pd.DataFrame:
-                     print(code+" get failed!")
+                    print(code+" get failed!")
+                elif d.empty:
+                    print(code+" get empty data")
                 else:
                     d['code'] = code
                     d.to_csv(baseDir+"/"+code+".csv",encoding='utf-8')
@@ -61,8 +67,8 @@ for code in codes:
                 d['code'] = code
                 d.to_csv(baseDir+"/"+code+".csv",encoding='utf-8')
             #data_list.append(d)
-    except:
-        print(code+" error")
+    except Exception as e:
+        print(code+" error   "+str(e))
 
 """
 def getTickData(code,dates):
