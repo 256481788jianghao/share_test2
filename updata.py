@@ -13,6 +13,7 @@ if not os.path.exists(baseDir):
 
 all_base_info = ts.get_stock_basics()
 all_base_info.to_csv(baseDir+"/"+"baseInfo.csv",encoding='utf-8');
+all_base_info = all_base_info[all_base_info.holders > 0]
 
 codes = all_base_info.index
 #codes = ['300024','000002','601878']
@@ -68,6 +69,7 @@ for code in codes:
                 d.to_csv(baseDir+"/"+code+".csv",encoding='utf-8')
             #data_list.append(d)
     except Exception as e:
+        index = index -1
         print(code+" error   "+str(e))
 
 """

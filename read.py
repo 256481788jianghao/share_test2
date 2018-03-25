@@ -7,7 +7,8 @@ import datetime
 baseDir = './database'
 
 def readBaseInfo():
-    return pd.read_csv(baseDir+"/baseInfo.csv",encoding='utf-8')
+    d = pd.read_csv(baseDir+"/baseInfo.csv",encoding='utf-8')
+    return d[d.holders > 0]
 
 def readData(codeStr,startDate=None,endDate=None,first=None):
     if not os.path.exists(baseDir+'/'+codeStr+'.csv'):
