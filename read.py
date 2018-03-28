@@ -108,7 +108,7 @@ def getPressFrame(code,start_date,end_date):
     ans = pd.DataFrame()
     data = readPriceData(code,start_date,end_date)
     if data.empty:
-        return None
+        return None,None,None
     else:
         length = len(data)
         for i in range(0,length):
@@ -128,16 +128,32 @@ def getPressFrame(code,start_date,end_date):
     return ans,minPress,curPress
             
         
-
+'''
 testData,minPress,curPress = getPressFrame('300024','2017-09-01','2018-03-23')
 testData.plot(x='price',y='press')
 plt.show()
 print(curPress)
 print(minPress)
+'''
+#======================================================================================================
+'''
+对所有股票进行压力计算
+'''
 
+def getAllPress(start_date,end_date):
+    def subFunc(item):
+        ans_dict = {}
+        pressFrame,minPress,curPress = getPressFrame(item,start_date,end_date)
+        ans_dict['code'] = item
+        ans_dict['minPress'] = minPress
+        ans_dict['curPress'] = curPress
+        print(item)
+        return pd.Series(ans_dict)
+    return baseInfo.codeStr.apply(subFunc)
+        
+        
     
-    
-
+print(getAllPress('2017-09-01','2018-03-23'))
 #======================================================================================================
 '''
 计算行业指数
