@@ -70,7 +70,7 @@ baseInfo = baseInfo[baseInfo.days > 10]
       而买入方，会在K1*P价格由于获利而抛出，形成W2*B抛压；而在K2*P的价格由于止损而抛出，也
       形成W3*B抛压。
 算法：1.实践中考虑到前复权的问题，交易数量已换手率代替；
-      2.为了便于横向比较，同一用当天价格对过去价格进行归一化；
+      2.为了便于横向比较，同一用当天价格对过去价格进行归一化,当天还手率对过去还手率进行归一化；
       3.由于无法得到每时每刻准确的数据，价格以收盘价估计
 '''
 
@@ -101,9 +101,10 @@ def readPriceData(code,start_date,end_date):
         return pd.DataFrame()
     else:
         data['price_cur'] = data.close/data.close.iloc[0]
+        data['tor_u'] = data.tor/data.tor.iloc[0]
         return data
 
-def getAnsFrame(code,start_date,end_date):
+def getPressFrame(code,start_date,end_date):
     ans = pd.DataFrame()
     data = readPriceData(code,start_date,end_date)
     if data.empty:
@@ -113,20 +114,26 @@ def getAnsFrame(code,start_date,end_date):
         for i in range(0,length):
             #计算增加的卖出压力
             if ans.empty:
-                ans['press'] = getWFrame(data.price_cur.iloc[i]).W*data.tor.iloc[i]
+                ans['press'] = getWFrame(data.price_cur.iloc[i]).W*data.tor_u.iloc[i]
             else:
-                ans['press'] = ans.press + getWFrame(data.price_cur.iloc[i]).W*data.tor.iloc[i]
+                ans['press'] = ans.press + getWFrame(data.price_cur.iloc[i]).W*data.tor_u.iloc[i]
             #print(ans.iloc[0])
     ans['price'] = ans.index*0.01*data.close.iloc[0]
-    ans.set_index('price')
-    print(ans)
-    return ans
+    #print(ans)
+    minPress = ans.press.min()
+    #curPrice = data.price_cur.iloc[0]
+    curPress = ans.press[100]
+    #print(curPress)
+    #print(minPress)
+    return ans,minPress,curPress
             
         
 
-testData = getAnsFrame('300024','2017-09-01','2018-03-23')
+testData,minPress,curPress = getPressFrame('300024','2017-09-01','2018-03-23')
 testData.plot(x='price',y='press')
 plt.show()
+print(curPress)
+print(minPress)
 
     
     
