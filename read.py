@@ -79,6 +79,7 @@ baseInfo = baseInfo[baseInfo.days > 10]
 '''
 1.此函数还有待改进，比如，如果当前价位处于历史高位附近，则每上涨1元所带来的获利性抛压，显然比
 其他价位要大
+2.应该引进时间上的修正，越久远的数据，对现在影响应该越小，但似乎只对压力的增加有效，对释放压力无效
 '''
 def getW(price_set,price_cur):
     #由于price_set的精度是0.01，所以price_cur要进行精度的四舍五入
@@ -125,16 +126,19 @@ def getPressFrame(code,start_date,end_date):
     curPress = ans.press[100]
     #print(curPress)
     #print(minPress)
+    ans['minPress'] = minPress
+    ans['curPress'] = curPress
     return ans,minPress,curPress
             
         
-'''
-testData,minPress,curPress = getPressFrame('300024','2017-09-01','2018-03-23')
-testData.plot(x='price',y='press')
-plt.show()
+
+testData,minPress,curPress = getPressFrame('300104','2017-09-01','2018-03-23')
+testData.plot(x='price')
 print(curPress)
 print(minPress)
-'''
+plt.show()
+
+
 #======================================================================================================
 '''
 对所有股票进行压力计算
@@ -153,7 +157,7 @@ def getAllPress(start_date,end_date):
         
         
     
-print(getAllPress('2017-09-01','2018-03-23'))
+#print(getAllPress('2017-09-01','2018-03-23'))
 #======================================================================================================
 '''
 计算行业指数
