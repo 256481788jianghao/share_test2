@@ -63,6 +63,74 @@ baseInfo['days'] = baseInfo.timeToMarket.apply(computeDays)
 
 baseInfo = baseInfo[baseInfo.days > 10]
 
+#===============================================================================
+'''
+计算压力线与抛售线
+原理：交易必须有买卖双方，当某股以P价格成交B股时，卖出方相当于在P价格减轻W1*B了卖出压力
+      而买入方，会在K1*P价格由于获利而抛出，形成W2*B抛压；而在K2*P的价格由于止损而抛出，也
+      形成W3*B抛压。
+算法：1.实践中考虑到前复权的问题，交易数量已换手率代替；
+      2.为了便于横向比较，同一用当天价格对过去价格进行归一化；
+      3.由于无法得到每时每刻准确的数据，价格以收盘价估计
+'''
+
+
+#计算W，price_set为目标价，price_cur为当前价
+'''
+1.此函数还有待改进，比如，如果当前价位处于历史高位附近，则每上涨1元所带来的获利性抛压，显然比
+其他价位要大
+'''
+def getW(price_set,price_cur):
+    #由于price_set的精度是0.01，所以price_cur要进行精度的四舍五入
+    price_cur_k = int(price_cur*100+0.5)*0.01
+    #print(price_cur_k)
+    diff = price_set - price_cur_k
+    if diff > 0.0001:
+        return diff
+    elif diff < -0.0001:
+        return (-diff)*1.01 #人类往往厌恶风险，所以止损性抛压要略加强，但幅度估计是否合理，待验证
+    else:
+        return -1
+
+def getWFrame(price_cur):
+    return pd.DataFrame({'W':[getW(x*0.01,price_cur) for x in range(0,200)]})
+
+def readPriceData(code,start_date,end_date):
+    data = readData(code,startDate=start_date,endDate=end_date)
+    if data.empty:
+        return pd.DataFrame()
+    else:
+        data['price_cur'] = data.close/data.close.iloc[0]
+        return data
+
+def getAnsFrame(code,start_date,end_date):
+    ans = pd.DataFrame()
+    data = readPriceData(code,start_date,end_date)
+    if data.empty:
+        return None
+    else:
+        length = len(data)
+        for i in range(0,length):
+            #计算增加的卖出压力
+            if ans.empty:
+                ans['press'] = getWFrame(data.price_cur.iloc[i]).W*data.tor.iloc[i]
+            else:
+                ans['press'] = ans.press + getWFrame(data.price_cur.iloc[i]).W*data.tor.iloc[i]
+            #print(ans.iloc[0])
+    ans['price'] = ans.index*0.01*data.close.iloc[0]
+    ans.set_index('price')
+    print(ans)
+    return ans
+            
+        
+
+testData = getAnsFrame('300024','2017-09-01','2018-03-23')
+testData.plot(x='price',y='press')
+plt.show()
+
+    
+    
+
 #======================================================================================================
 '''
 计算行业指数
@@ -93,8 +161,10 @@ def apply_group_func(items):
     ans_dict['time'] = com_date
     ans_dict['a_in'] = (items_save.k/items_save.p1*(items_save.p2-items_save.p1)).sum()*100
     return pd.Series(ans_dict)
+'''
 ans_data = baseInfo.groupby('industry').apply(apply_group_func)
 print(ans_data.sort_values(by='a_in',ascending=False))
+'''
 #======================================================================================================
 
 def computeData(data):
