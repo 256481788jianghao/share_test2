@@ -3,6 +3,7 @@ import tushare as ts
 import os
 import matplotlib.pyplot as plt
 import datetime
+import math
 
 baseDir = './database'
 
@@ -81,20 +82,20 @@ baseInfo = baseInfo[baseInfo.days > 10]
 其他价位要大
 2.应该引进时间上的修正，越久远的数据，对现在影响应该越小，但似乎只对压力的增加有效，对释放压力无效
 '''
-def getW(price_set,price_cur):
+def getW(price_set,price_cur,time_len):
     #由于price_set的精度是0.01，所以price_cur要进行精度的四舍五入
     price_cur_k = int(price_cur*100+0.5)*0.01
     #print(price_cur_k)
     diff = price_set - price_cur_k
     if diff > 0.0001:
-        return diff
+        return diff*math.exp(-1*time_len)
     elif diff < -0.0001:
-        return (-diff)*1.01 #人类往往厌恶风险，所以止损性抛压要略加强，但幅度估计是否合理，待验证
+        return (-diff)*math.exp(-1*time_len)*1.01 #人类往往厌恶风险，所以止损性抛压要略加强，但幅度估计是否合理，待验证
     else:
         return -1
 
-def getWFrame(price_cur):
-    return pd.DataFrame({'W':[getW(x*0.01,price_cur) for x in range(0,200)]})
+def getWFrame(price_cur,time_len):
+    return pd.DataFrame({'W':[getW(x*0.01,price_cur,time_len) for x in range(0,200)]})
 
 def readPriceData(code,start_date,end_date):
     data = readData(code,startDate=start_date,endDate=end_date)
@@ -115,29 +116,29 @@ def getPressFrame(code,start_date,end_date):
         for i in range(0,length):
             #计算增加的卖出压力
             if ans.empty:
-                ans['press'] = getWFrame(data.price_cur.iloc[i]).W*data.tor_u.iloc[i]
+                ans['press'] = getWFrame(data.price_cur.iloc[i],i).W*data.tor_u.iloc[i]
             else:
-                ans['press'] = ans.press + getWFrame(data.price_cur.iloc[i]).W*data.tor_u.iloc[i]
+                ans['press'] = ans.press + getWFrame(data.price_cur.iloc[i],i).W*data.tor_u.iloc[i]
             #print(ans.iloc[0])
     ans['price'] = ans.index*0.01*data.close.iloc[0]
     #print(ans)
     minPress = ans.press.min()
-    #curPrice = data.price_cur.iloc[0]
-    curPress = ans.press[100]
-    #print(curPress)
-    #print(minPress)
-    ans['minPress'] = minPress
-    ans['curPress'] = curPress
-    return ans,minPress,curPress
+    maxPress = ans.press.max()
+    ans['press_u'] = (ans.press - minPress)/(maxPress - minPress)
+    curPress_u = ans.press_u[100]
+    minPress_u = ans.press_u.min()
+    ans['minPress_u'] = minPress_u
+    ans['curPress_u'] = curPress_u
+    return ans,minPress_u,curPress_u
             
         
-
-testData,minPress,curPress = getPressFrame('300104','2017-09-01','2018-03-23')
-testData.plot(x='price')
+'''
+testData,minPress,curPress = getPressFrame('601878','2017-09-01','2018-03-23')
+testData.plot(y=['press_u'],x='price')
 print(curPress)
 print(minPress)
 plt.show()
-
+'''
 
 #======================================================================================================
 '''
@@ -157,7 +158,7 @@ def getAllPress(start_date,end_date):
         
         
     
-#print(getAllPress('2017-09-01','2018-03-23'))
+print(getAllPress('2017-09-01','2018-03-23'))
 #======================================================================================================
 '''
 计算行业指数
