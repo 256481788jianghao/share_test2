@@ -24,6 +24,16 @@ try:
         report_data.to_csv(baseDir+"/"+"reportdata_"+str(report_year - i)+"_"+str(report_q)+".csv",encoding='utf-8')
 except Exception as e:
     print(str(e))
+    
+profit_year = 2017
+profit_q = 4
+
+try:
+    for i in range(0,3):
+        profit_data = ts.get_profit_data(profit_year - i,profit_q)
+        profit_data.to_csv(baseDir+"/"+"profitdata_"+str(profit_year - i)+"_"+str(profit_q)+".csv",encoding='utf-8')
+except Exception as e:
+    print(str(e))
 
 '''
 

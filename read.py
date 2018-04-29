@@ -70,17 +70,50 @@ report_data_list = []
 report_data_list.append(pd.read_csv(baseDir+"/reportdata_"+str(report_year)+"_4.csv",encoding='utf-8'))
 report_data_list.append(pd.read_csv(baseDir+"/reportdata_"+str(report_year - 1)+"_4.csv",encoding='utf-8'))
 report_data_list.append(pd.read_csv(baseDir+"/reportdata_"+str(report_year - 2)+"_4.csv",encoding='utf-8'))
+#=====================================================================================================
+profit_year = 2017
+profit_data_list = []
+profit_data_list.append(pd.read_csv(baseDir+"/profitdata_"+str(profit_year)+"_4.csv",encoding='utf-8'))
+profit_data_list.append(pd.read_csv(baseDir+"/profitdata_"+str(profit_year - 1)+"_4.csv",encoding='utf-8'))
+profit_data_list.append(pd.read_csv(baseDir+"/profitdata_"+str(profit_year - 2)+"_4.csv",encoding='utf-8'))
 #======================================================================================================
 '''
-连续三年净利润率大于 yoy_up
+连续三年净利润率大于 yoy_up or roe
 '''
-report_yoy_up = 50
+
+'''
+report_yoy_up = 100
 report_data_list_p = []
 report_data_list_p.append(report_data_list[0][report_data_list[0].profits_yoy > report_yoy_up])
 report_data_list_p.append(report_data_list[1][report_data_list[1].profits_yoy > report_yoy_up])
 report_data_list_p.append(report_data_list[2][report_data_list[2].profits_yoy > report_yoy_up])
 report_data_p_code = set(report_data_list_p[0].code) & set(report_data_list_p[1].code) & set(report_data_list_p[2].code)
 print(report_data_p_code)
+
+report_roe_up = 20
+report_data_list_p = []
+report_data_list_p.append(report_data_list[0][report_data_list[0].roe > report_roe_up])
+report_data_list_p.append(report_data_list[1][report_data_list[1].roe > report_roe_up])
+report_data_list_p.append(report_data_list[2][report_data_list[2].roe > report_roe_up])
+report_data_p_code = set(report_data_list_p[0].code) & set(report_data_list_p[1].code) & set(report_data_list_p[2].code)
+
+baseInfo_p_up = baseInfo[[x in report_data_p_code for x in baseInfo.code]]
+print(baseInfo_p_up)
+'''
+#======================================================================================================
+'''
+连续三年净利润率大于 
+'''
+
+net_profit_rate = 50
+profit_data_list_p = []
+profit_data_list_p.append(profit_data_list[0][profit_data_list[0].net_profit_ratio > net_profit_rate])
+profit_data_list_p.append(profit_data_list[1][profit_data_list[1].net_profit_ratio > net_profit_rate])
+profit_data_list_p.append(profit_data_list[2][profit_data_list[2].net_profit_ratio > net_profit_rate])
+profit_data_p_code = set(profit_data_list_p[0].code) & set(profit_data_list_p[1].code) & set(profit_data_list_p[2].code)
+
+baseInfo_p_up = baseInfo[[x in profit_data_p_code for x in baseInfo.code]]
+print(baseInfo_p_up)
 #===============================================================================================
 '''
 计算压力线与抛售线
@@ -356,4 +389,15 @@ code,代码
         profits_yoy,净利润同比(%)
         distrib,分配方案
         report_date,发布日期
+'''
+'''
+code,代码
+        name,名称
+        roe,净资产收益率(%)
+        net_profit_ratio,净利率(%)
+        gross_profit_rate,毛利率(%)
+        net_profits,净利润(万元)
+        eps,每股收益
+        business_income,营业收入(百万元)
+        bips,每股主营业务收入(元)
 '''
