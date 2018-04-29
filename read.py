@@ -63,7 +63,24 @@ baseInfo['days'] = baseInfo.timeToMarket.apply(computeDays)
 
 baseInfo = baseInfo[baseInfo.days > 10]
 
+#=====================================================================================================
+report_year = 2017
+report_data_list = []
+report_data_list.append(pd.read_csv(baseDir+"/reportdata_"+str(report_year)+"_4.csv",encoding='utf-8'))
+report_data_list.append(pd.read_csv(baseDir+"/reportdata_"+str(report_year - 1)+"_4.csv",encoding='utf-8'))
+report_data_list.append(pd.read_csv(baseDir+"/reportdata_"+str(report_year - 2)+"_4.csv",encoding='utf-8'))
 #======================================================================================================
+'''
+连续三年净利润率大于 yoy_up
+'''
+report_yoy_up = 50
+report_data_list_p = []
+report_data_list_p.append(report_data_list[0][report_data_list[0].profits_yoy > report_yoy_up])
+report_data_list_p.append(report_data_list[1][report_data_list[1].profits_yoy > report_yoy_up])
+report_data_list_p.append(report_data_list[2][report_data_list[2].profits_yoy > report_yoy_up])
+report_data_p_code = set(report_data_list_p[0].code) & set(report_data_list_p[1].code) & set(report_data_list_p[2].code)
+print(report_data_p_code)
+#===============================================================================================
 '''
 计算行业指数
 算法：
@@ -93,8 +110,10 @@ def apply_group_func(items):
     ans_dict['time'] = com_date
     ans_dict['a_in'] = (items_save.k/items_save.p1*(items_save.p2-items_save.p1)).sum()*100
     return pd.Series(ans_dict)
+'''
 ans_data = baseInfo.groupby('industry').apply(apply_group_func)
 print(ans_data.sort_values(by='a_in',ascending=False))
+'''
 #======================================================================================================
 
 def computeData(data):
@@ -228,8 +247,16 @@ gpr,毛利率(%)
 npr,净利润率(%)
 holders,股东人数
 '''
-
-
-
-
-
+'''
+code,代码
+        name,名称
+        eps,每股收益
+        eps_yoy,每股收益同比(%)
+        bvps,每股净资产
+        roe,净资产收益率(%)
+        epcf,每股现金流量(元)
+        net_profits,净利润(万元)
+        profits_yoy,净利润同比(%)
+        distrib,分配方案
+        report_date,发布日期
+'''

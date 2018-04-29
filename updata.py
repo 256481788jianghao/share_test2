@@ -15,6 +15,18 @@ all_base_info = ts.get_stock_basics()
 all_base_info.to_csv(baseDir+"/"+"baseInfo.csv",encoding='utf-8');
 all_base_info = all_base_info[all_base_info.holders > 0]
 
+report_year = 2017
+report_q = 4
+
+try:
+    for i in range(0,3):
+        report_data = ts.get_report_data(report_year - i,report_q)
+        report_data.to_csv(baseDir+"/"+"reportdata_"+str(report_year - i)+"_"+str(report_q)+".csv",encoding='utf-8')
+except Exception as e:
+    print(str(e))
+
+'''
+
 codes = all_base_info.index
 #codes = ['300024','000002','601878']
 
@@ -71,7 +83,7 @@ for code in codes:
     except Exception as e:
         index = index -1
         print(code+" error   "+str(e))
-
+'''
 """
 def getTickData(code,dates):
     index = 0
