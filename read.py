@@ -104,12 +104,19 @@ print(baseInfo_p_up)
 '''
 连续三年净利润率大于 
 '''
-
-net_profit_rate = 50
+'''
+s_roe = 30
 profit_data_list_p = []
-profit_data_list_p.append(profit_data_list[0][profit_data_list[0].net_profit_ratio > net_profit_rate])
-profit_data_list_p.append(profit_data_list[1][profit_data_list[1].net_profit_ratio > net_profit_rate])
-profit_data_list_p.append(profit_data_list[2][profit_data_list[2].net_profit_ratio > net_profit_rate])
+profit_data_list_p.append(profit_data_list[0][profit_data_list[0].net_profit_ratio > s_roe])
+profit_data_list_p.append(profit_data_list[1][profit_data_list[1].net_profit_ratio > s_roe])
+profit_data_list_p.append(profit_data_list[2][profit_data_list[2].net_profit_ratio > s_roe])
+profit_data_p_code = set(profit_data_list_p[0].code) & set(profit_data_list_p[1].code) & set(profit_data_list_p[2].code)
+'''
+s_roe = 15
+profit_data_list_p = []
+profit_data_list_p.append(profit_data_list[0][profit_data_list[0].roe > s_roe])
+profit_data_list_p.append(profit_data_list[1][profit_data_list[1].roe > s_roe])
+profit_data_list_p.append(profit_data_list[2][profit_data_list[2].roe > s_roe])
 profit_data_p_code = set(profit_data_list_p[0].code) & set(profit_data_list_p[1].code) & set(profit_data_list_p[2].code)
 
 baseInfo_p_up = baseInfo[[x in profit_data_p_code for x in baseInfo.code]]
