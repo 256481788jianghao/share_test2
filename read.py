@@ -9,7 +9,7 @@ baseDir = './database'
 
 def readBaseInfo():
     d = pd.read_csv(baseDir+"/baseInfo.csv",encoding='utf-8')
-    return d[d.holders > 0]
+    return d[(d.holders > 0)]
 
 def readData(codeStr,startDate=None,endDate=None,first=None):
     if not os.path.exists(baseDir+'/'+codeStr+'.csv'):
@@ -120,6 +120,8 @@ profit_data_list_p.append(profit_data_list[2][profit_data_list[2].roe > s_roe])
 profit_data_p_code = set(profit_data_list_p[0].code) & set(profit_data_list_p[1].code) & set(profit_data_list_p[2].code)
 
 baseInfo_p_up = baseInfo[[x in profit_data_p_code for x in baseInfo.code]]
+baseInfo_last_year = pd.merge(baseInfo,profit_data_list[0],on='code')
+#print(baseInfo_last_year)
 
 def dealdata1(items):
     ans_dict = {}
@@ -127,9 +129,16 @@ def dealdata1(items):
     #ans_dict['mean_roe'] = items.roe.mean()
     return pd.Series(ans_dict)
 #print(baseInfo_p_up.groupby('industry').apply(dealdata1))
-print(baseInfo_p_up[baseInfo_p_up.industry == '专用机械'])
+#print(baseInfo_p_up[baseInfo_p_up.industry == '专用机械'])
 #print(profit_data_list_p[2][profit_data_list_p[2].code == 300743])
-#print(profit_data_list[0])
+
+def dealdata2(items):
+    ans_dict = {}
+    ans_dict['num'] = len(items)
+    ans_dict['mean_roe'] = items.roe.mean()
+    return pd.Series(ans_dict)
+#print(baseInfo_last_year.groupby('industry').apply(dealdata2).sort_values(by='mean_roe'))
+print(baseInfo_last_year[baseInfo_last_year.industry == '广告包装'])
 #===============================================================================================
 '''
 计算压力线与抛售线
