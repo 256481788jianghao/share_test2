@@ -62,7 +62,7 @@ def computeDays(date):
 
 baseInfo['days'] = baseInfo.timeToMarket.apply(computeDays)
 
-baseInfo = baseInfo[baseInfo.days > 10]
+baseInfo = baseInfo[baseInfo.days >= 365*3]
 
 #=====================================================================================================
 report_year = 2017
@@ -120,7 +120,16 @@ profit_data_list_p.append(profit_data_list[2][profit_data_list[2].roe > s_roe])
 profit_data_p_code = set(profit_data_list_p[0].code) & set(profit_data_list_p[1].code) & set(profit_data_list_p[2].code)
 
 baseInfo_p_up = baseInfo[[x in profit_data_p_code for x in baseInfo.code]]
-print(baseInfo_p_up)
+
+def dealdata1(items):
+    ans_dict = {}
+    ans_dict['num'] = len(items)
+    #ans_dict['mean_roe'] = items.roe.mean()
+    return pd.Series(ans_dict)
+#print(baseInfo_p_up.groupby('industry').apply(dealdata1))
+print(baseInfo_p_up[baseInfo_p_up.industry == '专用机械'])
+#print(profit_data_list_p[2][profit_data_list_p[2].code == 300743])
+#print(profit_data_list[0])
 #===============================================================================================
 '''
 计算压力线与抛售线
