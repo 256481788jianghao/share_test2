@@ -120,7 +120,7 @@ profit_data_list_p.append(profit_data_list[2][profit_data_list[2].roe > s_roe])
 profit_data_p_code = set(profit_data_list_p[0].code) & set(profit_data_list_p[1].code) & set(profit_data_list_p[2].code)
 
 baseInfo_p_up = baseInfo[[x in profit_data_p_code for x in baseInfo.code]]
-baseInfo_last_year = pd.merge(baseInfo,profit_data_list[0],on='code')
+
 #print(baseInfo_last_year)
 
 def dealdata1(items):
@@ -131,14 +131,31 @@ def dealdata1(items):
 #print(baseInfo_p_up.groupby('industry').apply(dealdata1))
 #print(baseInfo_p_up[baseInfo_p_up.industry == '专用机械'])
 #print(profit_data_list_p[2][profit_data_list_p[2].code == 300743])
-
+#===================================================================================================================
+baseInfo_last_year = pd.merge(baseInfo,profit_data_list[0],on='code')
+baseInfo_last_year = baseInfo_last_year[baseInfo_last_year.net_profits > 0]#排除净利润小于0
+#baseInfo_last_year = baseInfo_last_year[baseInfo_last_year.industry == '啤酒']
 def dealdata2(items):
     ans_dict = {}
+    
+    #剔除掉roe高于行业中位数10倍以上的股票，这类股票往往有问题
+    roe_median = items.roe.median()
+    items = items[items.roe < roe_median*10]
     ans_dict['num'] = len(items)
-    ans_dict['mean_roe'] = items.roe.mean()
+    #行业内前20%
+    num20 = int(len(items)*0.2+0.5)
+    if num20 < 1:
+        num20 = 1
+    items_sort = items.sort_values(by='roe',ascending=False)
+    #print(items_sort)
+    ans_dict['num20'] = num20
+    ans_dict['mean_roe'] = items_sort.head(num20).roe.mean()
+    ans_dict['median_roe'] = roe_median
+    #print(list(items_sort.head(num20).name_x))
     return pd.Series(ans_dict)
+    #return items_sort
 #print(baseInfo_last_year.groupby('industry').apply(dealdata2).sort_values(by='mean_roe'))
-print(baseInfo_last_year[baseInfo_last_year.industry == '广告包装'])
+print(baseInfo_last_year[baseInfo_last_year.industry == '特种钢'].sort_values(by='roe').loc[:,['name_x','eps','roe','net_profits','net_profit_ratio','gross_profit_rate']])
 #===============================================================================================
 '''
 计算压力线与抛售线
