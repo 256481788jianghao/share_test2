@@ -151,11 +151,12 @@ def dealdata2(items):
     ans_dict['num20'] = num20
     ans_dict['mean_roe'] = items_sort.head(num20).roe.mean()
     ans_dict['median_roe'] = roe_median
+    ans_dict['max_roe'] = items.roe.max()
     #print(list(items_sort.head(num20).name_x))
     return pd.Series(ans_dict)
     #return items_sort
-#print(baseInfo_last_year.groupby('industry').apply(dealdata2).sort_values(by='mean_roe'))
-print(baseInfo_last_year[baseInfo_last_year.industry == '特种钢'].sort_values(by='roe').loc[:,['name_x','eps','roe','net_profits','net_profit_ratio','gross_profit_rate']])
+print(baseInfo_last_year.groupby('industry').apply(dealdata2).sort_values(by='max_roe'))
+#print(baseInfo_last_year[baseInfo_last_year.industry == '普钢'].sort_values(by='roe').loc[:,['name_x','eps','roe','net_profits','net_profit_ratio','gross_profit_rate']])
 #===============================================================================================
 '''
 计算压力线与抛售线
