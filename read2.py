@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 import datetime
 import math
 
-print(report_data_list[0])
+print(readData('300024'))
+
 
 '''
 code,代码

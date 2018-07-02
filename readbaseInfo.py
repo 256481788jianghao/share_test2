@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import datetime
 import math
 
+pd.set_option('max_rows',1000)
+
 baseDir = './database'
 
 def readBaseInfo():
@@ -62,7 +64,7 @@ def computeDays(date):
 
 baseInfo['days'] = baseInfo.timeToMarket.apply(computeDays)
 
-baseInfo = baseInfo[baseInfo.days >= 365*3]
+baseInfo = baseInfo[baseInfo.days >= 365*0.5]
 
 #=====================================================================================================
 report_year = 2017
