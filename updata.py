@@ -14,7 +14,7 @@ if not os.path.exists(baseDir):
 all_base_info = ts.get_stock_basics()
 all_base_info.to_csv(baseDir+"/"+"baseInfo.csv",encoding='utf-8');
 all_base_info = all_base_info[all_base_info.holders > 0]
-
+'''
 report_year = 2017
 report_q = 4
 
@@ -93,7 +93,7 @@ for code in codes:
     except Exception as e:
         index = index -1
         print(code+" error   "+str(e))
-'''
+
 """
 def getTickData(code,dates):
     index = 0

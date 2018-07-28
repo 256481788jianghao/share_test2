@@ -7,6 +7,7 @@ import datetime
 import math
 import tensorflow as tf
 import numpy as np
+import random
 
 #用于存储单个股票数据的变量，防止重复读取
 one_stack_data = {'code':-1,'data':None}
@@ -20,7 +21,7 @@ def GetStockData(codestr,N,before = 5,after = 5):
     if one_stack_data['code'] != codestr:
         SetOneData(codestr)
     if N -1 < after:
-        print('error:GetData N-1 < after');
+        print('error:GetStockData N-1 < after');
         return None
     tmpData = one_stack_data['data']
     #归一化
@@ -42,10 +43,9 @@ def GetStockData(codestr,N,before = 5,after = 5):
     return beforeData,afterData,nclose
 
 #将pandas数据转换为训练数据,X为beforeData，Y如下定义：
-# afterData中的high 比 nclose 高 p% 输出 [1,0,0]
-# afterData中的low  比 nclose 低 p% 输出 [0,0,1]
-# 其他输出 [0,1,0]
-def GetNetWorkData(codestr,N,before = 5,after = 5,p=5):
+# afterData中的high 比 nclose 高 pp% and afterData中的low  比 nclose up -pn% 输出 [1,0,0,0]
+# high up low down [0,1,0,0]; high down low up [0,0,1,0];high down low down [0,0,0,1]
+def GetNetWorkData(codestr,N,before = 5,after = 5,pp=5,pn=5):
     beforeData,afterData,nclose = GetStockData(codestr,N,before,after)
     
     x = np.reshape(beforeData.values,before*7)
@@ -53,18 +53,72 @@ def GetNetWorkData(codestr,N,before = 5,after = 5,p=5):
     ph = afterData.high.max() - 1
     pl = afterData.low.min() - 1
 
-    y = np.array([0,1,0])
-    if ph*100 >= p :
-        y = np.array([1,0,0])
-    if pl*100 <= -p:
-        y = np.array([0,0,1])
+    y = None
+    hflag = ph*100 >= pp
+    lflag = pl*100 >= -pn
+    if hflag and lflag:
+        y = np.array([1,0,0,0])
+    elif hflag and not lflag:
+        y = np.array([0,1,0,0])
+    elif not hflag and lflag:
+        y = np.array([0,0,1,0])
+    else:
+        y= np.array([0,0,0,1])
     return x,y
     
+def GetNetWorkDataNum(codestr,Num=100,before = 5,after = 5,pp=5,pn=5):
+    if one_stack_data['code'] != codestr:
+        SetOneData(codestr)
+    maxLen = len(one_stack_data['data'])
+    if maxLen < before+after:
+        print('GetNetWorkDataNum error maxLen < before+after')
+        return None,None
+    if Num > maxLen - before - after:
+        Num = maxLen - before - after
+    xList = []
+    yList = []
+    for i in range(0,Num):
+        rIndex = random.randint(after+1,maxLen-before)
+        x,y = GetNetWorkData(codestr,rIndex,before,after,pp,pn)
+        xList.append(x)
+        yList.append(y)
+    return np.mat(xList),np.mat(yList)
 
+class NetWork:
+    def __init__(self,size):
+        self.level_num = len(size)
+        self.size = size
+        self.bais = [tf.Variable(tf.zeros([1,x])) for x in size]
+        self.Ws = []
+        self.Ws.append(tf.Variable(tf.zeros([size[0],size[0]])))
+        self.Ws.extend([tf.Variable(tf.zeros([m,n]))  for m,n in zip(size[:-1],size[1:])])
+        self.Zs = []
+        self.As = []
+        
+    def sigmoid(self,z):
+        return 1.0/(1.0+tf.exp(-z))
 
-x,y = GetNetWorkData('300024',15)
+    def output_fun(self,z):
+        return self.sigmoid(z)
 
-print(y)
+    def forward(self,in_data):
+        self.Zs.append(tf.matmul(in_data,self.Ws[0])+self.bais[0])
+        self.As.append(self.output_fun(self.Zs[0]))
+        for i in range(1,self.level_num):
+            self.Zs.append(tf.matmul(self.As[i-1],self.Ws[i])+self.bais[i])
+            self.As.append(self.output_fun(self.Zs[i]))
+        return self.As[-1]
+    
+
+network = NetWork([35,7,4])
+x,y = GetNetWorkDataNum('300024',Num=5)
+
+init = tf.global_variables_initializer()
+in_data = tf.placeholder('float')
+with tf.Session() as sess:
+    sess.run(init)
+    print(sess.run(network.forward(in_data),feed_dict={in_data:x}))
+    
 '''
 code,代码
 name,名称
