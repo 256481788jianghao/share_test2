@@ -109,11 +109,14 @@ class NetWork:
             self.As.append(self.output_fun(self.Zs[i]))
         return self.As[-1]
 
-    def softmax(self):
-        return tf.nn.softmax(logits=self.As[-1])
+    def softmax(self,out_data):
+        return tf.nn.softmax(logits=out_data)
 
     def cost_fun(self,y,out_data):
-        return -tf.reduce_sum(out_data*tf.log(tf.nn.softmax(logits=y)))
+        #y_ = self.softmax()
+        #y = out_data
+        #return tf.reduce_sum(y*tf.log(y_)+(1-y)*tf.log(1 - y_))/out_data_len
+        return tf.nn.softmax_cross_entropy_with_logits_v2(labels=out_data,logits=y)
 
     def train_fun(self,dd,cost_):
         return tf.train.GradientDescentOptimizer(dd).minimize(cost_)
@@ -121,22 +124,24 @@ class NetWork:
 
 network = NetWork([35,7,4])
 x,y = GetNetWorkDataNum('300024',Num=5)
+print(y)
 
 in_data = tf.placeholder('float')
 out_data = tf.placeholder('float')
 
 init = tf.global_variables_initializer()
 y_ = network.forward(in_data)
+softmax_out = network.softmax(out_data)
+hcost_ = out_data*tf.log(softmax_out)
 cost_ = network.cost_fun(y_,out_data)
 train_ = network.train_fun(0.01,cost_)
 
 with tf.Session() as sess:
     sess.run(init)
-    for i in range(0,2000):
+    for i in range(0,1):
         sess.run(train_,feed_dict={in_data:x,out_data:y})
+        print(sess.run(hcost_,feed_dict={in_data:x,out_data:y}))
         print(sess.run(cost_,feed_dict={in_data:x,out_data:y}))
-        print(y)
-        print(sess.run(y_,feed_dict={in_data:x}))
 
 
     
