@@ -130,8 +130,9 @@ in_data = tf.placeholder('float')
 out_data = tf.placeholder('float')
 
 init = tf.global_variables_initializer()
-y_ = network.forward(in_data)
-softmax_out = network.softmax(out_data)
+y_tmp_ = network.forward(in_data)
+y_ = network.Zs[-1]
+softmax_out = network.softmax(y_)
 hcost_ = out_data*tf.log(softmax_out)
 cost_ = network.cost_fun(y_,out_data)
 train_ = network.train_fun(0.01,cost_)
