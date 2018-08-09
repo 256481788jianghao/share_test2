@@ -20,10 +20,14 @@ def SetOneData(codestr):
 def GetStockData(codestr,N,before = 5,after = 5):
     if one_stack_data['code'] != codestr:
         SetOneData(codestr)
-    if N -1 < after:
-        print('error:GetStockData N-1 < after');
+    if N < after:
+        print('error:GetStockData N < after');
         return None
-    tmpData = one_stack_data['data']
+    tmpData = one_stack_data['data'].copy()
+    tmpDataLen = len(tmpData)
+    if tmpDataLen < N+before:
+        print('error:GetStockData tmpDataLen < N+before')
+        return None
     #归一化
     nclose = tmpData.iloc[N].close
     nvol = tmpData.iloc[N].vol
@@ -47,7 +51,7 @@ def GetStockData(codestr,N,before = 5,after = 5):
 # high up low down [0,1,0,0]; high down low up [0,0,1,0];high down low down [0,0,0,1]
 def GetNetWorkData(codestr,N,before = 5,after = 5,pp=5,pn=5):
     beforeData,afterData,nclose = GetStockData(codestr,N,before,after)
-    
+
     x = np.reshape(beforeData.values,before*7)
     
     ph = afterData.high.max() - 1
@@ -113,7 +117,8 @@ class NetWork:
         return tf.nn.softmax(logits=out_data)
 
     def cost_fun(self,y,out_data):
-        return tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=out_data,logits=y))
+        softmax_out = tf.nn.softmax_cross_entropy_with_logits_v2(labels=out_data,logits=y)
+        return tf.reduce_mean(softmax_out),softmax_out
 
     def train_fun(self,dd,cost_):
         return tf.train.GradientDescentOptimizer(dd).minimize(cost_)
@@ -133,9 +138,9 @@ init = tf.global_variables_initializer()
 y_tmp_ = network.forward(in_data)
 y_ = network.Zs[-1]
 #y_max_list = tf.argmax(y_,axis=1)
-softmax_out = network.softmax(y_)
-hcost_ = out_data*tf.log(softmax_out)
-cost_ = network.cost_fun(y_,out_data)
+#softmax_out = network.softmax(y_)
+#hcost_ = out_data*tf.log(softmax_out)
+cost_,softmax_out_ = network.cost_fun(y_,out_data)
 train_ = network.train_fun(0.001,cost_)
 
 with tf.Session() as sess:
@@ -144,8 +149,10 @@ with tf.Session() as sess:
         x,y = GetNetWorkDataNum('300024',Num=5)
         #print(y)
         sess.run(train_,feed_dict={in_data:x,out_data:y})
-        #print(sess.run(hcost_,feed_dict={in_data:x,out_data:y}))
+        #print(x)
+        #print(sess.run(y_,feed_dict={in_data:x,out_data:y}))
         print('cost=%f'%sess.run(cost_,feed_dict={in_data:x,out_data:y}))
+        #print(sess.run(softmax_out_,feed_dict={in_data:x,out_data:y}))
         y_out = sess.run(y_,feed_dict={in_data:x})
         equal_list = np.argmax(y,axis=1).T == np.argmax(y_out,axis=1)
         #print(equal_list)
