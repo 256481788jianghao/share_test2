@@ -51,8 +51,10 @@ def GetStockData(codestr,N,before = 5,after = 5):
 # high up low down [0,1,0,0]; high down low up [0,0,1,0];high down low down [0,0,0,1]
 def GetNetWorkData(codestr,N,before = 5,after = 5,pp=5,pn=5):
     beforeData,afterData,nclose = GetStockData(codestr,N,before,after)
+    #print(beforeData)
 
     x = np.reshape(beforeData.values,before*7)
+    print(x)
     
     ph = afterData.high.max() - 1
     pl = afterData.low.min() - 1
@@ -137,9 +139,6 @@ out_data = tf.placeholder('float')
 init = tf.global_variables_initializer()
 y_tmp_ = network.forward(in_data)
 y_ = network.Zs[-1]
-#y_max_list = tf.argmax(y_,axis=1)
-#softmax_out = network.softmax(y_)
-#hcost_ = out_data*tf.log(softmax_out)
 cost_,softmax_out_ = network.cost_fun(y_,out_data)
 train_ = network.train_fun(0.001,cost_)
 
@@ -147,16 +146,14 @@ with tf.Session() as sess:
     sess.run(init)
     for i in range(0,10):
         x,y = GetNetWorkDataNum('300024',Num=5)
-        #print(y)
         sess.run(train_,feed_dict={in_data:x,out_data:y})
-        #print(x)
-        #print(sess.run(y_,feed_dict={in_data:x,out_data:y}))
         print('cost=%f'%sess.run(cost_,feed_dict={in_data:x,out_data:y}))
-        #print(sess.run(softmax_out_,feed_dict={in_data:x,out_data:y}))
+        print(sess.run(softmax_out_,feed_dict={in_data:x,out_data:y}))
         y_out = sess.run(y_,feed_dict={in_data:x})
         equal_list = np.argmax(y,axis=1).T == np.argmax(y_out,axis=1)
-        #print(equal_list)
         print(np.sum(equal_list)/equal_list.shape[1])
+    #writer = tf.summary.FileWriter("D://TensorBoard//test",sess.graph)
+    #writer.close()
 
 
     
