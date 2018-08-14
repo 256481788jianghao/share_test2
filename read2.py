@@ -54,7 +54,7 @@ def GetNetWorkData(codestr,N,before = 5,after = 5,pp=5,pn=5):
     #print(beforeData)
 
     x = np.reshape(beforeData.values,before*7)
-    print(x)
+    #print(x)
     
     ph = afterData.high.max() - 1
     pl = afterData.low.min() - 1
@@ -91,8 +91,57 @@ def GetNetWorkDataNum(codestr,Num=100,before = 5,after = 5,pp=5,pn=5):
     return np.mat(xList),np.mat(yList)
 
 
+class NetWork:
+    def __init__(self,size):
+        self.layerNum = len(size)
+        self.size = size
+        self.Ws = []
+        self.Bs = []
+        self.Zs = []
+        self.As = []
+        self._make_mid_layers()
+        
+    def _make_mid_layers(self):
+        for i in range(self.layerNum-1):
+            w = tf.Variable(tf.random_normal(shape=[self.size[i],self.size[i+1]]),name='W'+str(i+1)+str(i+2))
+            b = tf.Variable(tf.random_normal(shape=[1,self.size[i+1]]),name='B'+str(i+2))
+            self.Ws.append(w)
+            self.Bs.append(b)
+            
+    def _mid_fun(self,in_data):
+        return in_data
 
-    
+    def _out_fun(self,in_data):
+        return in_data
+
+    def forward(self,x):
+        self.Zs.append(tf.matmul(x,self.Ws[0])+self.Bs[0])
+        self.As.append(self._mid_fun(self.Zs[0]))
+        for i in range(self.layerNum-2):
+            self.Zs.append(tf.matmul(self.As[i],self.Ws[i+1])+self.Bs[i+1])
+            if i == self.layerNum - 3:
+                self.As.append(self._out_fun(self.Zs[-1]))
+            else:
+                self.As.append(self._mid_fun(self.Zs[-1]))
+        return self.As[-1]
+
+
+network = NetWork([35,15,4])
+            
+x,y = GetNetWorkDataNum('300024',Num=5)
+
+input_data = tf.placeholder(dtype='float',shape=[None,5*7],name='input_data')
+out_data = tf.placeholder(dtype='float',shape=[None,5*7],name='out_data')
+
+init_variable = tf.global_variables_initializer()
+forward_out = network.forward(input_data)
+
+with tf.Session() as sess:
+    sess.run(init_variable)
+    sess.run(forward_out,feed_dict={input_data:x})
+    writer = tf.summary.FileWriter('D:/TensorBoard/test',sess.graph)
+    writer.close()
+
 '''
 code,代码
 name,名称
