@@ -115,8 +115,9 @@ class NetWork:
         return in_data
 
     def forward(self,x):
-        self.Zs.append(tf.matmul(x,self.Ws[0])+self.Bs[0])
-        self.As.append(self._mid_fun(self.Zs[0]))
+        with tf.name_scope('level1'):
+            self.Zs.append(tf.matmul(x,self.Ws[0])+self.Bs[0])
+            self.As.append(self._mid_fun(self.Zs[0]))
         for i in range(self.layerNum-2):
             self.Zs.append(tf.matmul(self.As[i],self.Ws[i+1])+self.Bs[i+1])
             if i == self.layerNum - 3:
