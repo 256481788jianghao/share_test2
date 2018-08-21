@@ -30,6 +30,17 @@ class StockData:
         codeR = stock_base_info[stock_base_info.symbol == code_int].ts_code.iloc[0]
         return codeR
 
+class NetWorkDNN:
+    def __init__(self,sizes):
+        self,sizes = sizes
+        self.layerNum = len(sizes)
+        self.Ws = []
+        self.Bs = []
+        if self.layerNum < 3:
+            print('DNN must have inputlayer hiddenlayer and outputlayer,but layerNum < 3')
+        else:
+            with tf.name_scope('input_layer'):
+                self.Ws.append(tf.Varaible(tf.eyes(shape=[sizes[0],sizes[0]],name='input_w')))
 
 
 StockData('4')
