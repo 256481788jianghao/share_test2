@@ -55,7 +55,7 @@ for year in report_year:
         print(code+" report "+str(report_index)+"/"+str(stock_len))
 
 
-'''
+
 stock_len = len(stock_base_info)
 stock_update_index = 0
 for code in stock_base_info.ts_code:
@@ -81,7 +81,7 @@ for code in stock_base_info.ts_code:
         data.to_csv(data_filename,encoding='utf-8')
         
     print(code+" "+str(stock_update_index)+"/"+str(stock_len))
-'''
+
 
 '''
 ts_code	str	股票代码
