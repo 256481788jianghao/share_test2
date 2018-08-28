@@ -34,11 +34,19 @@ def get_stockdata_by_date(item):
     if item.is_open == 1:
         dateStr = str(item.cal_date)
         stockdata_filename = baseDir+'/stock_'+dateStr+'.csv'
+        stockdata_adjust_filename = baseDir+'/stock_adjust_'+dateStr+'.csv'
         if not os.path.exists(stockdata_filename):
             try:
                 data = ts_api.daily(trade_date=dateStr)
                 data.to_csv(stockdata_filename,encoding='utf-8')
                 print(stockdata_filename+' finish')
+            except Exception as e:
+                print(e)
+        if not os.path.exists(stockdata_adjust_filename):
+            try:
+                data_adjust = ts_api.adj_factor(trade_date=dateStr)
+                data_adjust.to_csv(stockdata_adjust_filename,encoding='utf-8')
+                print(stockdata_adjust_filename+' finish')
             except Exception as e:
                 print(e)
             
