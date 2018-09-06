@@ -52,17 +52,16 @@ def get_stockdata_by_date(item):
             
 stock_trade_cal_info.apply(get_stockdata_by_date,axis=1)
 
-'''
+
 
 #get all stock code list
 stock_base_info_filename = baseDir+"/"+"baseInfo_"+today_str+".csv"
 stock_base_info = None
-if not os.path.exists(stock_base_info_filename):
-    stock_base_info_tmp = ts_api.stock_basic(list_status='L')
-    stock_base_info_tmp.to_csv(stock_base_info_filename,encoding='utf-8')
+stock_base_info_tmp = ts_api.stock_basic(list_status='L')
+stock_base_info_tmp.to_csv(stock_base_info_filename,encoding='utf-8')
 
-stock_base_info = pd.read_csv(stock_base_info_filename,encoding='utf-8',index_col=0)
-
+#stock_base_info = pd.read_csv(stock_base_info_filename,encoding='utf-8',index_col=0)
+'''
 report_year = ['2018']
 for year in report_year:
     start_year = int(year) - 2
