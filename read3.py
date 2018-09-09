@@ -43,7 +43,14 @@ def getStockAdjust(codeStr,start_date,end_date):
             
         
     
-oder = getStockAdjust('000001','20160901','20180904')
-data = pd.read_sql(oder,sql_conn)
-print(data)
+orders = getStockAdjust('000001','20160901','20180907')
+data_adj = pd.read_sql(orders,sql_conn)
+orders = getStock('000001','20160901','20180907')
+data = pd.read_sql(orders,sql_conn)
+#data.close.plot()
+#plt.show()
+
+data['new'] = data.close*data_adj.adj_factor/data_adj.adj_factor.iloc[-1]
+
+print(data[data.trade_date == '20170412'].new)
 sql_conn.close()

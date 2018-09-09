@@ -45,6 +45,7 @@ def get_stockdata_by_date(item):
         dateStr = str(item.cal_date)
         stockdata_table_name = 'stock_'+dateStr
         stockdata_adjust_table_name = 'stock_adjust_'+dateStr
+        stockdata_basic_table_name = 'stock_basic_'+dateStr
         if not isExists(stockdata_table_name):
             try:
                 data = ts_api.daily(trade_date=dateStr)
@@ -57,6 +58,13 @@ def get_stockdata_by_date(item):
                 data_adjust = ts_api.adj_factor(trade_date=dateStr)
                 data_adjust.to_sql(stockdata_adjust_table_name,sql_conn)
                 print(stockdata_adjust_table_name+' finish')
+            except Exception as e:
+                print(e)
+        if not isExists(stockdata_basic_table_name):
+            try:
+                data_adjust = ts_api.daily_basic(trade_date=dateStr)
+                data_adjust.to_sql(stockdata_basic_table_name,sql_conn)
+                print(stockdata_basic_table_name+' finish')
             except Exception as e:
                 print(e)
             
@@ -153,7 +161,24 @@ pct_change	float	涨跌幅
 vol	float	成交量 （手）
 amount	float	成交额 （千元）
 '''
+'''
+ts_code	str	TS股票代码
+trade_date	str	交易日期
+close	float	当日收盘价
+turnover_rate	float	换手率
+volume_ratio	float	量比
+pe	float	市盈率（总市值/净利润）
+pe_ttm	float	市盈率（TTM）
+pb	float	市净率（总市值/净资产）
+ps	float	市销率
+ps_ttm	float	市销率（TTM）
+total_share	float	总股本 （万）
+float_share	float	流通股本 （万）
+free_share	float	自由流通股本 （万）
+total_mv	float	总市值 （万元）
+circ_mv	float	流通市值（万元）
 
+'''
 '''
 ts_code	str	TS股票代码
 ann_date	str	公告日期
