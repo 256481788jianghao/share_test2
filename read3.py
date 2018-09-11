@@ -16,6 +16,10 @@ def getOneStock(codeStr,dateStr):
 def getOneStockAdjust(codeStr,dateStr):
     return 'select * from stock_adjust_'+dateStr+' where ts_code like "'+codeStr+'%"'
 
+def getOneStockBasic(codeStr,dateStr):
+    return 'select * from stock_basic_'+dateStr+' where ts_code like "'+codeStr+'%"'
+
+
 def getTradeDate(start_date,end_date):
     return pd.read_sql('select * from trade_cal where is_open = 1 and cal_date >='+start_date+' and cal_date <= '+end_date,sql_conn)
 
@@ -40,6 +44,17 @@ def getStockAdjust(codeStr,start_date,end_date):
         else:
             orders = orders+getOneStockAdjust(codeStr,trade_cal_data.cal_date.iloc[i])+' union all '
     return orders
+
+def getStockBasic(codeStr,start_date,end_date):
+    trade_cal_data = getTradeDate(start_date,end_date)
+    trade_cal_data_len = len(trade_cal_data)
+    orders = ''
+    for i in range(trade_cal_data_len):
+        if i == trade_cal_data_len - 1:
+            orders = orders+getOneStockBasic(codeStr,trade_cal_data.cal_date.iloc[i])
+        else:
+            orders = orders+getOneStockBasic(codeStr,trade_cal_data.cal_date.iloc[i])+' union all '
+    return orders
             
         
     
@@ -47,10 +62,13 @@ orders = getStockAdjust('000001','20160901','20180907')
 data_adj = pd.read_sql(orders,sql_conn)
 orders = getStock('000001','20160901','20180907')
 data = pd.read_sql(orders,sql_conn)
+orders = getStockBasic('000001','20160901','20180907')
+databasic = pd.read_sql(orders,sql_conn)
+print(databasic)
 #data.close.plot()
 #plt.show()
 
 data['new'] = data.close*data_adj.adj_factor/data_adj.adj_factor.iloc[-1]
 
-print(data[data.trade_date == '20170412'].new)
+print(data.new)
 sql_conn.close()
