@@ -56,8 +56,10 @@ def getStockBasic(codeStr,start_date,end_date):
             orders = orders+getOneStockBasic(codeStr,trade_cal_data.cal_date.iloc[i])+' union all '
     return orders
             
-        
-    
+orders = getStock('601878','20161017','20181019')
+data = pd.read_sql(orders,sql_conn)
+print(data.trade_date)
+'''   
 orders = getStockAdjust('000001','20160901','20180907')
 data_adj = pd.read_sql(orders,sql_conn)
 orders = getStock('000001','20160901','20180907')
@@ -71,4 +73,5 @@ print(databasic)
 data['new'] = data.close*data_adj.adj_factor/data_adj.adj_factor.iloc[-1]
 
 print(data.new)
+'''
 sql_conn.close()
