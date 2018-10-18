@@ -1,25 +1,16 @@
-import redis
-import tushare as ts
 import pandas as pd
+import tushare as ts
 import os
+import matplotlib.pyplot as plt
 import datetime
-from io import StringIO
+import math
+import tensorflow as tf
+import numpy as np
+import random
+import sqlite3
 
-pool= redis.ConnectionPool(host='localhost',port=6379,decode_responses=True)
+ts.set_token('edd599506620c2fa4466f6ff765ff458d3dd894b136356c68b8baa32')
+ts_api = ts.pro_api()
 
-r=redis.Redis(connection_pool=pool)
-
-baseDir = './database2'
-
-todaytime = datetime.datetime.now()
-today_str = todaytime.strftime('%Y_%m_%d')
-today_str2 = todaytime.strftime('%Y%m%d')
-
-stock_trade_cal_filename = baseDir+"/"+"trade_cal_"+today_str+".csv"
-stock_trade_cal_info = pd.read_csv(stock_trade_cal_filename,encoding='utf-8',index_col=0)
-
-def getData(key):
-    dataStr = pd.read_msgpack(r.get(key),encoding='utf-8')
-    return dataStr
-    
-print(getData('stock_20180904'))
+data = ts.pro_bar(pro_api=ts_api, ts_code='601878.SH', adj='qfq',freq='D')
+print(data)
